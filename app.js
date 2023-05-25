@@ -8,6 +8,7 @@ const path = require('path');
 dotenv.config({ path: path.resolve(__dirname+"/src", 'config', '.env') });
 const authRouter = require('./src/routes/Admin/authRouter');
 const session = require('express-session');
+const { statusCode, getNotFoundMsg } = require("./src/utils/statusCodeUtil");
 var MongoDBStore = require('connect-mongodb-session')(session);
 const store = new MongoDBStore({
     uri:process.env.MONGODB_URI+"/trade",
@@ -27,6 +28,11 @@ app.use(parser.json({extended:true}));
 // auth ruoter
 app.use('/',authRouter);
 
+app.use((req,res)=>{
+  res.status(statusCode.NOT_FOUND).send(getNotFoundMsg("Not Found"))
+})
+
+
 app.use(function(err, req, res, next) {
     // console.error(err.stack);
     res.status(err.status).send(err.message);
@@ -42,7 +48,7 @@ const resetSessionStorage = async () => {
     }
   };
 mongoose.connect(process.env.MONGODB_URI+'/trade').then(result=>{
-    resetSessionStorage();
+    // resetSessionStorage();
     console.log("connected");
     app.listen(3000);
 }).catch(error=>{

@@ -19,6 +19,10 @@ const userSchema = new Schema({
         type:String,
         required : false
     },
+    role :{
+        type:String,
+        require:false
+    },
     resetToken : String,
     resetTokenExpiration : Date || null,
 })
