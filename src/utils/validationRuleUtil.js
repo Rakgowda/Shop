@@ -101,3 +101,14 @@ exports.forgotPasswordRule = [
         return true;
     })
 ]
+
+exports.updatePasswordRule =[
+    body('password',errorMsg("Password length should me more than 5",statusCode.BAD_REQUEST)).isLength({min:5}).trim(),
+    body('confirmedpassword').trim().custom((value,{req})=>{
+        if(value != req.body.password)
+        {
+            throwNewError("Password and confirmed password are not matching",statusCode.BAD_REQUEST)
+        }
+        return true;
+    })
+]

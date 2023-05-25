@@ -1,7 +1,7 @@
 const userSchema = require("../../models/Admin/userSchema");
 const bcrypt = require("bcryptjs");
 // const crypto = require("crypto");
-const { statusCode, getBadRequestMsg, getInternalServerMsg, getOkMsg, getNotFoundMsg } = require("../../utils/statusCodeUtil");
+const { statusCode, getBadRequestMsg, getInternalServerMsg, getOkMsg, getNotFoundMsg, getUnauthorizedMsg } = require("../../utils/statusCodeUtil");
 const {validationResult } = require("express-validator");
 const { validationErroResponse } = require("../../utils/errorHandlerUtils");
 const jwt = require('jsonwebtoken');
@@ -134,7 +134,7 @@ exports.forgotPassword = async(req,res,next)=>{
                     // text: 'Node.js testing mail for GeeksforGeeks',
                     html: "<b>Please click here reset the password <a href='http://localhost:3000/reset/" + resetToken +"'>Reset Pawword</a></b>", 
                   }
-                  let mailsent = await mailTransporter.sendMail(mailDetails)
+                //   let mailsent = await mailTransporter.sendMail(mailDetails)
                   if(mailsent)
                   {
                     res.send(getOkMsg("Password reset link is sent to email, please check your email."))
@@ -148,4 +148,42 @@ exports.forgotPassword = async(req,res,next)=>{
 
 }
 
+exports.reset = async (req,res,next)=>{
+    const resetToken = req.params.resetToken;
+    const user = await userSchema.findOne({ resetToken: resetToken, resetTokenExpiration :{$gt: Date.now()} });
+    if(user)
+    {
+      res.send(getOkMsg("Valid token."));
+    }
+    else{
+        res.status(statusCode.UNAUTHORIZED).send(getUnauthorizedMsg("Invalid token"));
+    }
+  
+  }
 
+  exports.updatePassword = async (req,res,next)=>{
+    const {password,resetToken} = req.body;
+    const result = validationResult(req);
+    if(!result.isEmpty())
+    {
+        return validationErroResponse(result,res);
+    }
+    const user = await userSchema.findOne({ resetToken: resetToken, resetTokenExpiration :{$gt: Date.now()} });
+  
+    if(user)
+    {
+        const hashPassword = await bcrypt.hash(password,12);
+        user.password = hashPassword;
+        user.resetToken ="";
+        user.resetTokenExpiration= null;
+        const saveUser = await user.save()
+        if(saveUser)
+        {
+          res.send(getOkMsg("Password updated successfully."));
+        }
+    }
+    else{
+        res.status(statusCode.UNAUTHORIZED).send(getUnauthorizedMsg("Invalid token"));
+    }
+  
+  }

@@ -31,3 +31,7 @@ exports.getNotFoundMsg = (errorMsg)=>{
 exports.getOkMsg = (successMsg)=>{
     return {successMsg:successMsg}
 }
+
+exports.getUnauthorizedMsg = (errorMsg)=>{
+    return {errorMsg: errorMsg}
+}
