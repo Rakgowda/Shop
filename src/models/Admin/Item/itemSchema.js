@@ -24,6 +24,10 @@ const itemSchema = new Schema({
     createdBy :{
         type:String,
         require:true
+    },
+    updatedBy :{
+        type:String,
+        require:false
     }
 
 })

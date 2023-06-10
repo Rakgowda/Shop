@@ -6,9 +6,10 @@ const dotenv = require('dotenv');
 const path = require('path');
 // accessing environment varaibles
 dotenv.config({ path: path.resolve(__dirname+"/src", 'config', '.env') });
-const authRouter = require('./src/routes/Admin/authRouter');
+const authRouter = require('./src/routes/Admin/user/authRouter');
+const itemRouter = require('./src/routes/Admin/item/itemRouter')
 const session = require('express-session');
-const { statusCode, getNotFoundMsg } = require("./src/utils/statusCodeUtil");
+const { statusCode, getNotFoundMsg, getInternalServerMsg } = require("./src/utils/statusCodeUtil");
 var MongoDBStore = require('connect-mongodb-session')(session);
 const store = new MongoDBStore({
     uri:process.env.MONGODB_URI+"/trade",
@@ -27,6 +28,7 @@ app.use(session({
 app.use(parser.json({extended:true}));
 // auth ruoter
 app.use('/',authRouter);
+app.use('/item/',itemRouter);
 
 app.use((req,res)=>{
   res.status(statusCode.NOT_FOUND).send(getNotFoundMsg("Not Found"))
@@ -34,8 +36,8 @@ app.use((req,res)=>{
 
 
 app.use(function(err, req, res, next) {
-    // console.error(err.stack);
-    res.status(err.status).send(err.message);
+    console.error(err);
+    res.status(statusCode.INTERNAL_SERVER_ERROR).send(getInternalServerMsg("Internal server error."));
   });
 
 const resetSessionStorage = async () => {

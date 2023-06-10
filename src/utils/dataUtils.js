@@ -1,5 +1,6 @@
 var _ = require('lodash');
 const crypto = require('crypto');
+const { ObjectId } = require('mongoose').Types;
 
 exports.isEmpty = (value)=>{
     return _.isEmpty(value)
@@ -24,4 +25,12 @@ exports.getRandomBytes= (bytes=32)=>{
         return ""
     }
 
+}
+
+exports.isValidObjectId = (id) =>{
+    return ObjectId.isValid(id);
+  }
+
+exports.getUserName = (req) =>{
+    return req.accesInfo.user.username;
 }

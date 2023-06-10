@@ -58,11 +58,6 @@ exports.updateUserInfoRule = [
         if(isEmpty(value)){
             throwNewError("Please enter valid user name",statusCode.BAD_REQUEST)
         }
-        const user = req.accesInfo.user;
-        if(user.username != value)
-        {
-            throwNewError("Unauthorise access",statusCode.UNAUTHORIZED)
-        }
         const result = await userScheama.findOne({username:value});
         if(!result){
             throwNewError("Can't able to update username that's not present",statusCode.CONFLICT)
@@ -70,10 +65,13 @@ exports.updateUserInfoRule = [
         return true;
     }),
     body('email',errorMsg("Please enter valid email",statusCode.BAD_REQUEST)).isEmail().normalizeEmail().custom(async(value,{req})=>{
-
-        const result = await userScheama.findOne({email:value});
-        const user = req.accesInfo.user;
-        if(result && result.email != user.email){
+        let result = await userScheama.findOne({email:value,username:req.body.username});
+        if(result)
+        {
+            return true;
+        }
+        result = await userScheama.findOne({email:value});
+        if(result){
             throwNewError("Email already exists",statusCode.CONFLICT)
         }
         return true;

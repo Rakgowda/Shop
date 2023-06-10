@@ -6,7 +6,7 @@ const { isAuthenticated } = require('../../../middlewares/is-auth');
 const { isAdminAccess } = require('../../../middlewares/is-admin');
 
 // sign up
-routes.post("/signup",createUserRules,authController.postSignUp);
+routes.post("/createUser",isAuthenticated,isAdminAccess,createUserRules,authController.postreateUser);
 routes.post("/signin",userSignInRule,authController.postSignIn);
 routes.put("/udateUserInfo",isAuthenticated,isAdminAccess,updateUserInfoRule,authController.udateUserInfo)
 routes.get("/getAllUsers",isAuthenticated,isAdminAccess,authController.getAllUsers);
